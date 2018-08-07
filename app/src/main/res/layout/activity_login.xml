@@ -27,6 +27,7 @@
             android:layout_height="wrap_content">
 
             <EditText
+                android:id="@+id/email_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/email" />
@@ -40,20 +41,23 @@
             >
 
             <EditText
+                android:inputType="textPassword"
+                android:id="@+id/password_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/password" />
         </android.support.design.widget.TextInputLayout>
 
         <Button
-            android:text="@string/signin_email"
-            android:theme="@style/ButtonStyle"
+            android:id="@+id/email_login_button"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginBottom="35dp"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:layout_marginTop="15dp" />
+            android:layout_marginTop="15dp"
+            android:text="@string/signin_email"
+            android:theme="@style/ButtonStyle" />
 
         <Button
             android:textColor="@color/colorWhite"
