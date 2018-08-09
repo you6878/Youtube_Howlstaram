@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Howlstagram</string>
-    <string name="facebook_app_id"></string>
-    <string name="fb_login_protocol_scheme"></string>
+    <string name="facebook_app_id">233845390800996</string>
+    <string name="fb_login_protocol_scheme">fb233845390800996</string>
     <string name="com.twitter.sdk.android.CONSUMER_KEY"></string>
     <string name="com.twitter.sdk.android.CONSUMER_SECRET"></string>
 

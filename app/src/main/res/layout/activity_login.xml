@@ -60,6 +60,7 @@
             android:theme="@style/ButtonStyle" />
 
         <Button
+            android:id="@+id/facebook_login_button"
             android:textColor="@color/colorWhite"
             android:text="@string/signin_facebook"
             android:background="@drawable/btn_signin_facebook"
