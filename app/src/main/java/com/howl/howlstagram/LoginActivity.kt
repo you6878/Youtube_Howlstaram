@@ -158,8 +158,19 @@ class LoginActivity : AppCompatActivity() {
 
     fun handleFacebookAccessToken(token: AccessToken?) {
         var credential = FacebookAuthProvider.getCredential(token?.token!!)
-        auth?.signInWithCredential(credential)
+        auth?.signInWithCredential(credential)?.addOnCompleteListener {
+            task ->
+            if(task.isSuccessful){
+                moveMainPage(auth?.currentUser)
+            }
 
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        moveMainPage(auth?.currentUser)
     }
 
 
