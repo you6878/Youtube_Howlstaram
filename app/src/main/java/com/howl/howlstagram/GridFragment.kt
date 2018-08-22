@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide.init
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import com.howl.howlstagram.model.ContentDTO
+import kotlinx.android.synthetic.main.fragment_grid.view.*
 
 class GridFragment :Fragment(){
 
@@ -21,9 +22,8 @@ class GridFragment :Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mainView = inflater.inflate(R.layout.fragment_grid,container,false)
-        var recyclerView = mainView?.findViewById<RecyclerView>(R.id.gridfragment_recyclerview)
-        recyclerView?.adapter = GridFragmentRecyclerviewAdapter()
-        recyclerView?.layoutManager = GridLayoutManager(activity,3)
+        mainView?.gridfragment_recyclerview?.adapter = GridFragmentRecyclerviewAdapter()
+        mainView?.gridfragment_recyclerview?.layoutManager = GridLayoutManager(activity,3)
         return mainView
     }
     inner class GridFragmentRecyclerviewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
