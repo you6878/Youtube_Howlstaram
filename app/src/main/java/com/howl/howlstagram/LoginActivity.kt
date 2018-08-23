@@ -128,7 +128,13 @@ class LoginActivity : AppCompatActivity() {
 
     fun firebaseAuthWithGoogle(account: GoogleSignInAccount) {
         var credential = GoogleAuthProvider.getCredential(account.idToken, null)
-        auth?.signInWithCredential(credential)
+        auth?.signInWithCredential(credential)?.addOnCompleteListener {
+
+            task ->
+            if(task.isSuccessful){
+                moveMainPage(auth?.currentUser)
+            }
+        }
 
     }
 

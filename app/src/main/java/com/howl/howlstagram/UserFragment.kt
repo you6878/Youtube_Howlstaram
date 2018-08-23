@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.howl.howlstagram.model.ContentDTO
+import com.howl.howlstagram.model.FollowDTO
 import kotlinx.android.synthetic.main.fragment_user.*
 import kotlinx.android.synthetic.main.fragment_user.view.*
 
@@ -23,9 +24,21 @@ class UserFragment : Fragment() {
     var fragmentView: View? = null
     var PICK_PROFILE_FROM_ALBUM = 10
     var firestore: FirebaseFirestore? = null
-    var uid: String? = null
+    //현재 나의 uid
+    var currentUserUid: String? = null
+    //내가 선택한 uid
+    var uid : String? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        uid = FirebaseAuth.getInstance().currentUser?.uid
+        currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+
+        if(arguments != null){
+
+            uid = arguments!!.getString("destinationUid")
+
+        }
+
+
+
         firestore = FirebaseFirestore.getInstance()
         fragmentView = inflater.inflate(R.layout.fragment_user, container, false)
         fragmentView?.account_iv_profile?.setOnClickListener {
@@ -37,11 +50,86 @@ class UserFragment : Fragment() {
         fragmentView?.account_recyclerview?.adapter = UserFragmentRecycldrViewAdapter()
         fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(activity!!,3)
         getProfileImages()
+
+        fragmentView?.account_btn_follow_signout?.setOnClickListener {
+            requestFollow()
+        }
         return fragmentView
     }
 
+    fun requestFollow(){
+        var tsDocFollowing = firestore!!.collection("users").document(currentUserUid!!)
+
+        firestore?.runTransaction {
+            transaction ->
+            var followDTO = transaction.get(tsDocFollowing).toObject(FollowDTO::class.java)
+            if(followDTO == null){
+                //아무도 팔로잉 하지 않았을 경우
+                followDTO = FollowDTO()
+                followDTO.followingCount = 1
+                followDTO.followings[uid!!] = true
+
+                transaction.set(tsDocFollowing,followDTO)
+                return@runTransaction
+            }
+
+            if(followDTO.followings.containsKey(uid)){
+                //내 아이디가 제3를 이미 팔로잉 하고 있을 경우 -> 제3자가 나를 팔로워 취소한다.
+                followDTO?.followingCount = followDTO?.followingCount -1
+                followDTO?.followings.remove(uid)
+            }else{
+                //내가 제3를 팔로잉 하지 않았을 경우 -> 제3자가 나를 팔로워 한다.
+                followDTO.followingCount = followDTO.followingCount  + 1
+                followDTO.followings[uid!!] = true
+            }
+            transaction.set(tsDocFollowing,followDTO)
+            return@runTransaction
+        }
+
+        var tsDocFollower = firestore!!.collection("users").document(uid!!)
+        firestore?.runTransaction { transaction ->
+            var followDTO = transaction.get(tsDocFollower).toObject(FollowDTO::class.java)
+
+            if(followDTO == null){
+                //아무도 팔로워 하지 않았을 경우
+                followDTO = FollowDTO()
+                followDTO!!.followerCount = 1
+                followDTO!!.followers[currentUserUid!!] = true
+
+                transaction.set(tsDocFollower,followDTO)
+                return@runTransaction
+
+            }
+
+            if(followDTO.followers.containsKey(currentUserUid!!)){
+                //제3자의 유저를 내가 팔로잉 하고 있을 경우 -> 팔로워 취소 하겠다.
+
+                followDTO!!.followerCount = followDTO!!.followerCount - 1
+                followDTO!!.followers.remove(currentUserUid!!)
+
+
+
+            }else{
+                //제3자를 내가 팔로워 하지 않았을 경우 -> 팔로워 하겠다.
+
+                followDTO.followerCount = followDTO.followerCount + 1
+                followDTO.followers[currentUserUid!!]  = true
+
+
+            }
+            transaction.set(tsDocFollower,followDTO)
+            return@runTransaction
+
+
+
+        }
+
+
+
+    }
+
     fun getProfileImages() {
-        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+        firestore?.collection("profileImages")?.document(currentUserUid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
             if (documentSnapshot.data != null) {
                 var url = documentSnapshot?.data!!["image"]
                 Glide.with(activity).load(url).apply(RequestOptions().circleCrop()).into(fragmentView!!.account_iv_profile)
