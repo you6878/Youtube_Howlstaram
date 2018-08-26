@@ -13,36 +13,56 @@
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="35dp">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <ImageView
+                android:id="@+id/toolbar_btn_back"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/ic_arrow_back"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="22dp"
+                />
+            <TextView
+                android:gravity="center"
+                android:textColor="@color/colorNavIcon"
+                android:layout_centerVertical="true"
+                android:id="@+id/toolbar_username"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:src="@drawable/logo_title"
+                android:text="test@mail.com"
+                android:textSize="16sp"
+                android:layout_toRightOf="@+id/toolbar_btn_back"
                 />
+
+            <ImageView
+                android:id="@+id/toolbar_title_image"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/logo_title" />
         </RelativeLayout>
 
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
-        android:layout_above="@+id/bottom_navigation"
-        android:layout_below="@+id/my_toolbar"
         android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom_navigation"
+        android:layout_below="@+id/my_toolbar">
 
     </FrameLayout>
 
     <android.support.design.widget.BottomNavigationView
 
         android:id="@+id/bottom_navigation"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/bottom_navigation_main"
-        >
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_navigation_main">
 
     </android.support.design.widget.BottomNavigationView>
 
