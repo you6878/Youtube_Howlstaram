@@ -20,7 +20,7 @@
     <TextView
 
         android:layout_margin="7.5dp"
-        android:text = "유저 아이디"
+        android:text = "메세지"
         android:id="@+id/commentviewitem_textview_comment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
