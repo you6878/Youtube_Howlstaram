@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 return true
             }
             R.id.action_favorite_alarm -> {
-                var alertFragment = AlertFragment()
+                var alertFragment = AlarmFragment()
                 supportFragmentManager.beginTransaction().replace(R.id.main_content,alertFragment).commit()
                 return true
             }

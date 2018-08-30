@@ -146,7 +146,6 @@ class LoginActivity : AppCompatActivity() {
                 .getInstance()
                 .registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
                     override fun onSuccess(result: LoginResult?) {
-
                         handleFacebookAccessToken(result?.accessToken)
                     }
 

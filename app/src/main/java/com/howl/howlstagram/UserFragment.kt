@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.howl.howlstagram.model.AlarmDTO
 import com.howl.howlstagram.model.ContentDTO
 import com.howl.howlstagram.model.FollowDTO
 import kotlinx.android.synthetic.main.activity_main.*
@@ -146,6 +147,7 @@ class UserFragment : Fragment() {
 
                 followDTO.followerCount = followDTO.followerCount + 1
                 followDTO.followers[currentUserUid!!] = true
+                followerAlarm(uid)
 
 
             }
@@ -169,6 +171,17 @@ class UserFragment : Fragment() {
 
         }
 
+    }
+
+    fun followerAlarm(destinationUid: String?){
+        var alarmDTO = AlarmDTO()
+        alarmDTO.destinationUid = destinationUid
+        alarmDTO.userId = auth?.currentUser!!.email
+        alarmDTO.uid = auth?.currentUser!!.uid
+        alarmDTO.kind = 2
+        alarmDTO.timestamp = System.currentTimeMillis()
+
+        FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
     }
 
     fun getFollower(){
