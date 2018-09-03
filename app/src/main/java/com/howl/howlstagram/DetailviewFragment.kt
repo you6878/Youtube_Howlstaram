@@ -13,12 +13,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.howl.howlstagram.model.AlarmDTO
 import com.howl.howlstagram.model.ContentDTO
+import com.howl.howlstagram.model.FollowDTO
 import kotlinx.android.synthetic.main.fragment_detail.view.*
 import kotlinx.android.synthetic.main.item_detail.view.*
 
 class DetailviewFragment : Fragment() {
     var firestore: FirebaseFirestore? = null
-    var user : FirebaseAuth? = null
+    var user: FirebaseAuth? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -44,14 +45,35 @@ class DetailviewFragment : Fragment() {
             //현재 로그인된 유저의 UID(주민등록번호)
             var uid = FirebaseAuth.getInstance().currentUser?.uid
 
+            firestore?.collection("users")?.document(uid!!)?.get()?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    var userDTO = task.result.toObject(FollowDTO::class.java)
+                    if (userDTO != null) {
+                        getCotents(userDTO.followings)
+                    }
+
+
+                }
+            }
+        }
+
+        //followers.keys = [ UaXMEKfkvBWhiOzHPdiOBCdqbaz2, sc9bKjRXqLQnhpGJWjMbE7375Wr1]
+
+
+
+
+        fun getCotents(followers: MutableMap<String, Boolean>) {
             firestore?.collection("images")?.orderBy("timestamp")?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 if (querySnapshot == null) return@addSnapshotListener
                 contentDTOs.clear()
                 contentUidList.clear()
                 for (snapshot in querySnapshot!!.documents) {
                     var item = snapshot.toObject(ContentDTO::class.java)
-                    contentDTOs.add(item)
-                    contentUidList.add(snapshot.id)
+                    if (followers.keys.contains(item.uid)){
+                        contentDTOs.add(item)
+                        contentUidList.add(snapshot.id)
+                    }
+
                 }
                 notifyDataSetChanged()
 
@@ -107,10 +129,10 @@ class DetailviewFragment : Fragment() {
                 activity!!.supportFragmentManager.beginTransaction().replace(R.id.main_content, fragment).commit()
 
             }
-            viewHolder.detailviewitem_comment_imageview.setOnClickListener {v ->
-                var intent = Intent(v.context,CommentActivity::class.java)
-                intent.putExtra("contentUid",contentUidList[position])
-                intent.putExtra("destinationUid",contentDTOs[position].uid)
+            viewHolder.detailviewitem_comment_imageview.setOnClickListener { v ->
+                var intent = Intent(v.context, CommentActivity::class.java)
+                intent.putExtra("contentUid", contentUidList[position])
+                intent.putExtra("destinationUid", contentDTOs[position].uid)
                 startActivity(intent)
 
 
@@ -141,7 +163,8 @@ class DetailviewFragment : Fragment() {
             }
 
         }
-        fun favoriteAlarm(destinationUid:String){
+
+        fun favoriteAlarm(destinationUid: String) {
             var alarmDTO = AlarmDTO()
             alarmDTO.destinationUid = destinationUid
             alarmDTO.userId = user?.currentUser?.email

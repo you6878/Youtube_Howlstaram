@@ -1,8 +1,10 @@
 package com.howl.howlstagram
 
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutCompat
 import android.support.v7.widget.RecyclerView
@@ -189,6 +191,21 @@ class UserFragment : Fragment() {
             if(documentSnapshot == null)return@addSnapshotListener
             var followDTO = documentSnapshot.toObject(FollowDTO::class.java)
             fragmentView?.account_tv_follower_count?.text = followDTO?.followerCount.toString()
+            if (followDTO?.followers?.containsKey(currentUserUid)!!) {
+
+                fragmentView?.account_btn_follow_signout?.text = getString(R.string.follow_cancel)
+                fragmentView?.account_btn_follow_signout
+                        ?.background
+                        ?.setColorFilter(ContextCompat.getColor(activity!!, R.color.colorLightGray), PorterDuff.Mode.MULTIPLY)
+            } else {
+
+                if (uid != currentUserUid) {
+
+                    fragmentView?.account_btn_follow_signout?.text = getString(R.string.follow)
+                    fragmentView?.account_btn_follow_signout?.background?.colorFilter = null
+                }
+            }
+
         }
 
     }
