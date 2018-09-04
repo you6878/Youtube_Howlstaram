@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -64,6 +65,17 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         bottom_navigation.setOnNavigationItemSelectedListener(this)
         bottom_navigation.selectedItemId = R.id.action_home
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),1)
+        registerPushToken()
+    }
+    fun registerPushToken(){
+        var pushToken = FirebaseInstanceId.getInstance().token
+        var uid = FirebaseAuth.getInstance().currentUser?.uid
+        var map = mutableMapOf<String,Any>()
+
+        map["pushToken"] = pushToken!!
+        FirebaseFirestore.getInstance().collection("pushtokens").document(uid!!).set(map)
+
+
     }
     fun setToolbarDefault(){
         toolbar_btn_back.visibility = View.GONE
