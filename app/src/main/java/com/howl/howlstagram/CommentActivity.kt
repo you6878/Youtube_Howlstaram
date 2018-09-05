@@ -20,12 +20,14 @@ class CommentActivity : AppCompatActivity() {
     var contentUid : String? = null
     var user : FirebaseAuth? = null
     var destinationUid : String? = null
+    var fcmPush : FcmPush? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
         user = FirebaseAuth.getInstance()
         contentUid = intent.getStringExtra("contentUid")
         destinationUid = intent.getStringExtra("destinationUid")
+        fcmPush = FcmPush()
         comment_recyclerview.adapter = CommentRecylcerViewAdapter()
         comment_recyclerview.layoutManager = LinearLayoutManager(this)
         comment_btn_send.setOnClickListener {
@@ -53,7 +55,11 @@ class CommentActivity : AppCompatActivity() {
         alarmDTO.timestamp = System.currentTimeMillis()
 
         FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
+
+        var message = user?.currentUser?.email + getString(R.string.alarm_who) + message + getString(R.string.alarm_comment)
+        fcmPush?.sendMessage(destinationUid,"알림 메세지 입니다.",message)
     }
+
     inner class CommentRecylcerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
         val comments :ArrayList<ContentDTO.Comment>

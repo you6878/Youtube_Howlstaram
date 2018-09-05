@@ -20,11 +20,13 @@ import kotlinx.android.synthetic.main.item_detail.view.*
 class DetailviewFragment : Fragment() {
     var firestore: FirebaseFirestore? = null
     var user: FirebaseAuth? = null
+    var fcmPush :FcmPush? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         firestore = FirebaseFirestore.getInstance()
         user = FirebaseAuth.getInstance()
+        fcmPush = FcmPush()
         var view = LayoutInflater.from(inflater.context).inflate(R.layout.fragment_detail, container, false)
         view.detailviewfragment_recyclerview.adapter = DetailRecyclerviewAdapter()
         view.detailviewfragment_recyclerview.layoutManager = LinearLayoutManager(activity)
@@ -173,6 +175,10 @@ class DetailviewFragment : Fragment() {
             alarmDTO.timestamp = System.currentTimeMillis()
 
             FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
+
+            var message = user?.currentUser?.email + getString(R.string.alarm_favorite)
+            fcmPush?.sendMessage(destinationUid,"알림 메세지 입니다.",message)
+
         }
     }
 

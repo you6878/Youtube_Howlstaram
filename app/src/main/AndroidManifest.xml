@@ -42,7 +42,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".AddPhotoActivity" />
-        <activity android:name=".CommentActivity"></activity>
+        <activity android:name=".CommentActivity"
+            android:windowSoftInputMode="adjustPan"
+            ></activity>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/push_icon"/>

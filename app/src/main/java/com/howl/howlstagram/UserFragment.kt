@@ -33,12 +33,13 @@ class UserFragment : Fragment() {
     var uid: String? = null
 
     var auth :FirebaseAuth? = null
+    var fcmPush : FcmPush? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
         firestore = FirebaseFirestore.getInstance()
         fragmentView = inflater.inflate(R.layout.fragment_user, container, false)
-
+        fcmPush = FcmPush()
         auth = FirebaseAuth.getInstance()
         if (arguments != null) {
 
@@ -184,6 +185,8 @@ class UserFragment : Fragment() {
         alarmDTO.timestamp = System.currentTimeMillis()
 
         FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
+        var message = auth?.currentUser?.email + getString(R.string.alarm_follow)
+        fcmPush?.sendMessage(destinationUid!!,"알림 메세지 입니다.",message)
     }
 
     fun getFollower(){
