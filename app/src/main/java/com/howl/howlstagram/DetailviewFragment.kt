@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.howl.howlstagram.model.AlarmDTO
@@ -99,6 +100,15 @@ class DetailviewFragment : Fragment() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
             val viewHolder = (holder as CustomViewHolder).itemView
+
+            firestore?.collection("profileImages")?.document(contentDTOs[position].uid!!)?.get()?.addOnCompleteListener {
+                task ->
+                if(task.isSuccessful){
+                    var url = task.result["image"]
+                    Glide.with(holder.itemView.context).load(url).apply(RequestOptions().circleCrop()).into(viewHolder.detailviewitem_profile_image)
+                }
+            }
+
             //유저 아이디
             viewHolder.detailviewitem_profile_textview.text = contentDTOs!![position].userId
             //이미지

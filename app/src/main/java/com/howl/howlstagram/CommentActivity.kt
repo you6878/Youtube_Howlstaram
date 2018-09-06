@@ -7,6 +7,8 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,6 +16,7 @@ import com.howl.howlstagram.model.AlarmDTO
 import com.howl.howlstagram.model.ContentDTO
 import kotlinx.android.synthetic.main.activity_comment.*
 import kotlinx.android.synthetic.main.item_comment.view.*
+import kotlinx.android.synthetic.main.item_detail.view.*
 
 class CommentActivity : AppCompatActivity() {
 
@@ -94,6 +97,14 @@ class CommentActivity : AppCompatActivity() {
             var view = holder.itemView
             view.commentviewitem_textview_comment.text = comments[position].comment
             view.commentviewitem_textview_profile.text = comments[position].userId
+
+            FirebaseFirestore.getInstance().collection("profileImages")?.document(comments[position].uid!!)?.get()?.addOnCompleteListener {
+                task ->
+                if(task.isSuccessful){
+                    var url = task.result["image"]
+                    Glide.with(holder.itemView.context).load(url).apply(RequestOptions().circleCrop()).into(view.commentviewItem_imageview_profile)
+                }
+            }
 
 
         }

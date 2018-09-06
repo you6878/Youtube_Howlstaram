@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.howl.howlstagram.model.AlarmDTO
 import com.howl.howlstagram.model.ContentDTO
 import com.howl.howlstagram.model.FollowDTO
@@ -32,8 +33,13 @@ class UserFragment : Fragment() {
     //내가 선택한 uid
     var uid: String? = null
 
-    var auth :FirebaseAuth? = null
-    var fcmPush : FcmPush? = null
+    var auth: FirebaseAuth? = null
+    var fcmPush: FcmPush? = null
+
+    var followListenerRegistration: ListenerRegistration? = null
+    var followingListenerRegistration: ListenerRegistration? = null
+    var imageprofileListenerRegistration: ListenerRegistration? = null
+    var recyclerListenerRegistration: ListenerRegistration? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
@@ -49,7 +55,7 @@ class UserFragment : Fragment() {
                 fragmentView?.account_btn_follow_signout?.text = getString(R.string.signout)
                 fragmentView?.account_btn_follow_signout?.setOnClickListener {
                     activity?.finish()
-                    startActivity(Intent(activity,LoginActivity::class.java))
+                    startActivity(Intent(activity, LoginActivity::class.java))
                     auth?.signOut()
                 }
 
@@ -83,12 +89,7 @@ class UserFragment : Fragment() {
             activity?.startActivityForResult(photoPcikerIntent, PICK_PROFILE_FROM_ALBUM)
 
         }
-        fragmentView?.account_recyclerview?.adapter = UserFragmentRecyclerViewAdapter()
-        fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(activity!!, 3)
-        getProfileImages()
 
-        getFollower()
-        getFollowing()
 
 
 
@@ -164,9 +165,9 @@ class UserFragment : Fragment() {
     }
 
     fun getProfileImages() {
-        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+        imageprofileListenerRegistration = firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
 
-            if(documentSnapshot == null) return@addSnapshotListener
+            if (documentSnapshot == null) return@addSnapshotListener
             if (documentSnapshot.data != null) {
                 var url = documentSnapshot?.data!!["image"]
                 Glide.with(activity).load(url).apply(RequestOptions().circleCrop()).into(fragmentView!!.account_iv_profile)
@@ -176,7 +177,7 @@ class UserFragment : Fragment() {
 
     }
 
-    fun followerAlarm(destinationUid: String?){
+    fun followerAlarm(destinationUid: String?) {
         var alarmDTO = AlarmDTO()
         alarmDTO.destinationUid = destinationUid
         alarmDTO.userId = auth?.currentUser!!.email
@@ -186,12 +187,32 @@ class UserFragment : Fragment() {
 
         FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
         var message = auth?.currentUser?.email + getString(R.string.alarm_follow)
-        fcmPush?.sendMessage(destinationUid!!,"알림 메세지 입니다.",message)
+        fcmPush?.sendMessage(destinationUid!!, "알림 메세지 입니다.", message)
     }
 
-    fun getFollower(){
-        firestore?.collection("users")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            if(documentSnapshot == null)return@addSnapshotListener
+    override fun onResume() {
+        super.onResume()
+        getProfileImages()
+        getFollowing()
+        getFollower()
+        fragmentView?.account_recyclerview?.adapter = UserFragmentRecyclerViewAdapter()
+        fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(activity!!, 3)
+
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        followListenerRegistration?.remove()
+        followingListenerRegistration?.remove()
+        imageprofileListenerRegistration?.remove()
+        recyclerListenerRegistration?.remove()
+
+    }
+
+    fun getFollower() {
+        followListenerRegistration = firestore?.collection("users")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            if (documentSnapshot == null) return@addSnapshotListener
             var followDTO = documentSnapshot.toObject(FollowDTO::class.java)
             fragmentView?.account_tv_follower_count?.text = followDTO?.followerCount.toString()
             if (followDTO?.followers?.containsKey(currentUserUid)!!) {
@@ -212,9 +233,10 @@ class UserFragment : Fragment() {
         }
 
     }
-    fun getFollowing(){
-        firestore?.collection("users")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
-            if(documentSnapshot == null)return@addSnapshotListener
+
+    fun getFollowing() {
+        followingListenerRegistration = firestore?.collection("users")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            if (documentSnapshot == null) return@addSnapshotListener
             var followDTO = documentSnapshot.toObject(FollowDTO::class.java)
             fragmentView?.account_tv_following_count?.text = followDTO.followingCount.toString()
         }
@@ -225,8 +247,8 @@ class UserFragment : Fragment() {
 
         init {
             contentDTOs = ArrayList()
-            firestore?.collection("images")?.whereEqualTo("uid", uid)?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                if(querySnapshot == null) return@addSnapshotListener
+            recyclerListenerRegistration = firestore?.collection("images")?.whereEqualTo("uid", uid)?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
+                if (querySnapshot == null) return@addSnapshotListener
                 for (snapshot in querySnapshot.documents) {
                     contentDTOs.add(snapshot.toObject(ContentDTO::class.java))
                 }
